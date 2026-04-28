@@ -31,6 +31,10 @@ function checkLogin(req, success, additionalData = {}) {
     if (!success) {
         state.failedAttemptsByIp[ip] = (state.failedAttemptsByIp[ip] || 0) + 1;
         state.failedAttemptsByEmail[email] = (state.failedAttemptsByEmail[email] || 0) + 1;
+    } else {
+        // Reset counters on successful login to prevent permanent lockout
+        delete state.failedAttemptsByIp[ip];
+        delete state.failedAttemptsByEmail[email];
     }
 
     const recentFailed = state.recentAttempts.filter(a => !a.success);

@@ -4,7 +4,7 @@ function calculateRiskScore(loginData) {
 
   if (loginData.ipFailedAttempts === 3 || loginData.ipFailedAttempts === 4) {
     score += 10;
-    reasons.push("3rd failed attempt from same IP");
+    reasons.push("3rd or 4th failed attempt from same IP");
   }
   if (loginData.ipFailedAttempts >= 5) {
     score += 20;

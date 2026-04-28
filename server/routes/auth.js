@@ -117,6 +117,9 @@ router.post("/login", async (req, res) => {
     if (stepUp) {
       return res.status(403).json({ success: false, error: "Account Locked. A 2FA recovery link has been sent to your email.", stepUp: true });
     }
+    if (isBlocked) {
+      return res.status(403).json({ success: false, error: "Login blocked due to high security risk." });
+    }
     return res.status(401).json({ success: false, error: "Invalid credentials" });
   }
 
@@ -135,6 +138,9 @@ router.post("/login", async (req, res) => {
     
     if (stepUp) {
       return res.status(403).json({ success: false, error: "Account Locked. A 2FA recovery link has been sent to your email.", stepUp: true });
+    }
+    if (isBlocked) {
+      return res.status(403).json({ success: false, error: "Login blocked due to high security risk." });
     }
     return res.status(401).json({ success: false, error: "Invalid credentials" });
   }

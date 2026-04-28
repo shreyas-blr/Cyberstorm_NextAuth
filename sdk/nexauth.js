@@ -281,9 +281,9 @@
 
   // ─── Build Form HTML ────────────────────────────────────────────────────────
   function getFormHTML(isInline) {
-    return \`
-      <div class="na-form-wrapper" style="\${!isInline ? 'position:relative;' : ''}">
-        \${!isInline ? '<button class="na-close-btn" id="na-close" aria-label="Close">&times;</button>' : ''}
+    return `
+      <div class="na-form-wrapper" style="${!isInline ? 'position:relative;' : ''}">
+        ${!isInline ? '<button class="na-close-btn" id="na-close" aria-label="Close">&times;</button>' : ''}
 
         <div class="na-logo-row">
           <div class="na-logo-badge">
@@ -338,7 +338,7 @@
           End-to-end security
         </div>
       </div>
-    \`;
+    `;
   }
 
   // ─── Build Modal Background ──────────────────────────────────────────────────
@@ -363,13 +363,13 @@
     const btn = document.createElement("button");
     btn.id = "nexauth-trigger-btn";
     btn.setAttribute("aria-label", "Open NexAuth Login");
-    btn.innerHTML = \`
+    btn.innerHTML = `
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
         <path d="M12 2L4 6v6c0 5.25 3.5 10.16 8 11.38C16.5 22.16 20 17.25 20 12V6L12 2z"
           fill="rgba(255,255,255,0.9)"/>
       </svg>
       Sign In with NexAuth
-    \`;
+    `;
     document.body.appendChild(btn);
     return btn;
   }
@@ -445,18 +445,18 @@
 
     // Messages
     function showMessage(type, text) {
-      messageEl.className = \`na-message na-\${type} na-show\`;
+      messageEl.className = `na-message na-${type} na-show`;
       messageEl.innerHTML =
         (type === "success"
-          ? \`<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                <path d="M20 6L9 17l-5-5" stroke="#34d399" stroke-width="2.5"
                  stroke-linecap="round" stroke-linejoin="round"/>
-             </svg>\`
-          : \`<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+             </svg>`
+          : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                <circle cx="12" cy="12" r="10" stroke="#f87171" stroke-width="2"/>
                <path d="M12 8v4m0 4h.01" stroke="#f87171" stroke-width="2"
                  stroke-linecap="round"/>
-             </svg>\`) + text;
+             </svg>`) + text;
     }
     function hideMessage() {
       messageEl.className = "na-message";
@@ -492,7 +492,7 @@
 
       // Hash password in the browser — raw password NEVER leaves device
       submitBtn.disabled = true;
-      submitBtn.innerHTML = \`<span class="na-loader"></span>Hashing & Signing In…\`;
+      submitBtn.innerHTML = `<span class="na-loader"></span>Hashing & Signing In…`;
 
       let hashedPassword;
       try {
@@ -523,7 +523,7 @@
 
       // Send to server — only hashedPassword, NEVER raw password
       try {
-        const response = await fetch(\`\${API_BASE}/auth/login\`, {
+        const response = await fetch(`${API_BASE}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, hashedPassword, apiKey: API_KEY, timeToFillFormMs }),
@@ -535,7 +535,7 @@
           localStorage.setItem("nexauth_token", data.token);
           showMessage(
             "success",
-            \`Authenticated! Welcome, <strong>\${email}</strong>\`
+            `Authenticated! Welcome, <strong>${email}</strong>`
           );
           submitBtn.innerHTML = "✓ Signed In";
           
@@ -545,9 +545,9 @@
              if (!isInline) closeModal();
           }, 2200);
         } else {
-          const msg = data.error || data.message || \`Server responded with \${response.status}\`;
+          const msg = data.error || data.message || `Server responded with ${response.status}`;
           if (data.stepUp) {
-            showMessage("error", \`🚨 \${msg}\`);
+            showMessage("error", `🚨 ${msg}`);
             submitBtn.innerHTML = "Account Locked";
             // Intentional: keep button disabled
           } else {
@@ -562,11 +562,11 @@
           "[NexAuth] Backend not reachable — running in demo mode.",
           networkErr
         );
-        const fakeToken = btoa(\`demo:\${email}:\${Date.now()}\`);
+        const fakeToken = btoa(`demo:${email}:${Date.now()}`);
         localStorage.setItem("nexauth_token", fakeToken);
         showMessage(
           "success",
-          \`[Demo Mode] Hashed &amp; authenticated! Token stored locally.\`
+          `[Demo Mode] Hashed &amp; authenticated! Token stored locally.`
         );
         submitBtn.innerHTML = "✓ Signed In (Demo)";
         
