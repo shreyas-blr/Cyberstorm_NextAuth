@@ -100,6 +100,11 @@
       opacity: 1;
     }
 
+    .na-form-wrapper {
+      font-family: 'Inter', sans-serif;
+      width: 100%;
+    }
+
     .na-logo-row {
       display: flex;
       align-items: center;
@@ -129,7 +134,7 @@
       font-weight: 500;
     }
 
-    .na-field-group { margin-bottom: 18px; }
+    .na-field-group { margin-bottom: 18px; text-align: left; }
     .na-label {
       display: block;
       color: #94a3b8;
@@ -163,6 +168,7 @@
       padding: 8px 12px;
       margin-top: 8px;
       display: none;
+      text-align: left;
     }
     .na-hash-preview-label {
       color: #475569;
@@ -229,6 +235,7 @@
       display: none;
       align-items: center;
       gap: 9px;
+      text-align: left;
     }
     .na-message.na-success {
       background: rgba(16,185,129,0.12);
@@ -272,17 +279,11 @@
     document.head.appendChild(style);
   }
 
-  // ─── Build Modal HTML ────────────────────────────────────────────────────────
-  function buildModal() {
-    const overlay = document.createElement("div");
-    overlay.id = "nexauth-overlay";
-    overlay.setAttribute("role", "dialog");
-    overlay.setAttribute("aria-modal", "true");
-    overlay.setAttribute("aria-label", "NexAuth Login");
-
-    overlay.innerHTML = `
-      <div id="nexauth-modal" style="position:relative;">
-        <button class="na-close-btn" id="na-close" aria-label="Close">&times;</button>
+  // ─── Build Form HTML ────────────────────────────────────────────────────────
+  function getFormHTML(isInline) {
+    return \`
+      <div class="na-form-wrapper" style="\${!isInline ? 'position:relative;' : ''}">
+        \${!isInline ? '<button class="na-close-btn" id="na-close" aria-label="Close">&times;</button>' : ''}
 
         <div class="na-logo-row">
           <div class="na-logo-badge">
@@ -337,8 +338,22 @@
           End-to-end security
         </div>
       </div>
-    `;
+    \`;
+  }
 
+  // ─── Build Modal Background ──────────────────────────────────────────────────
+  function buildModal() {
+    const overlay = document.createElement("div");
+    overlay.id = "nexauth-overlay";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "NexAuth Login");
+
+    const modal = document.createElement("div");
+    modal.id = "nexauth-modal";
+    modal.innerHTML = getFormHTML(false);
+
+    overlay.appendChild(modal);
     document.body.appendChild(overlay);
     return overlay;
   }
@@ -348,13 +363,13 @@
     const btn = document.createElement("button");
     btn.id = "nexauth-trigger-btn";
     btn.setAttribute("aria-label", "Open NexAuth Login");
-    btn.innerHTML = `
+    btn.innerHTML = \`
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
         <path d="M12 2L4 6v6c0 5.25 3.5 10.16 8 11.38C16.5 22.16 20 17.25 20 12V6L12 2z"
           fill="rgba(255,255,255,0.9)"/>
       </svg>
       Sign In with NexAuth
-    `;
+    \`;
     document.body.appendChild(btn);
     return btn;
   }
@@ -362,8 +377,17 @@
   // ─── Controller ─────────────────────────────────────────────────────────────
   function init() {
     injectStyles();
-    const overlay = buildModal();
-    const triggerBtn = buildTriggerButton();
+
+    let overlay, triggerBtn;
+    const inlineContainer = document.getElementById("nexauth-container");
+    const isInline = !!inlineContainer;
+
+    if (isInline) {
+      inlineContainer.innerHTML = getFormHTML(true);
+    } else {
+      overlay = buildModal();
+      triggerBtn = buildTriggerButton();
+    }
 
     const form = document.getElementById("na-login-form");
     const emailInput = document.getElementById("na-email");
@@ -378,10 +402,13 @@
     let formStartTime = 0;
 
     function openModal() {
+      if (isInline) return;
       overlay.classList.add("na-visible");
       setTimeout(() => emailInput.focus(), 280);
     }
+    
     function closeModal() {
+      if (isInline) return;
       overlay.classList.remove("na-visible");
       resetForm();
     }
@@ -418,38 +445,36 @@
 
     // Messages
     function showMessage(type, text) {
-      messageEl.className = `na-message na-${type} na-show`;
+      messageEl.className = \`na-message na-\${type} na-show\`;
       messageEl.innerHTML =
         (type === "success"
-          ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          ? \`<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                <path d="M20 6L9 17l-5-5" stroke="#34d399" stroke-width="2.5"
                  stroke-linecap="round" stroke-linejoin="round"/>
-             </svg>`
-          : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+             </svg>\`
+          : \`<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                <circle cx="12" cy="12" r="10" stroke="#f87171" stroke-width="2"/>
                <path d="M12 8v4m0 4h.01" stroke="#f87171" stroke-width="2"
                  stroke-linecap="round"/>
-             </svg>`) + text;
+             </svg>\`) + text;
     }
     function hideMessage() {
       messageEl.className = "na-message";
     }
 
-    // Trigger
-    triggerBtn.addEventListener("click", openModal);
-
-    // Close on backdrop click
-    overlay.addEventListener("click", function (e) {
-      if (e.target === overlay) closeModal();
-    });
-    closeBtn.addEventListener("click", closeModal);
-
-    // Escape key
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && overlay.classList.contains("na-visible")) {
-        closeModal();
-      }
-    });
+    // Modal Trigger and Close
+    if (!isInline) {
+      triggerBtn.addEventListener("click", openModal);
+      overlay.addEventListener("click", function (e) {
+        if (e.target === overlay) closeModal();
+      });
+      closeBtn.addEventListener("click", closeModal);
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && overlay.classList.contains("na-visible")) {
+          closeModal();
+        }
+      });
+    }
 
     // ─── Form Submit ───────────────────────────────────────────────────────────
     form.addEventListener("submit", async function (e) {
@@ -467,7 +492,7 @@
 
       // Hash password in the browser — raw password NEVER leaves device
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<span class="na-loader"></span>Hashing & Signing In…`;
+      submitBtn.innerHTML = \`<span class="na-loader"></span>Hashing & Signing In…\`;
 
       let hashedPassword;
       try {
@@ -498,7 +523,7 @@
 
       // Send to server — only hashedPassword, NEVER raw password
       try {
-        const response = await fetch(`${API_BASE}/auth/login`, {
+        const response = await fetch(\`\${API_BASE}/auth/login\`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, hashedPassword, apiKey: API_KEY, timeToFillFormMs }),
@@ -510,14 +535,19 @@
           localStorage.setItem("nexauth_token", data.token);
           showMessage(
             "success",
-            `Authenticated! Welcome, <strong>${email}</strong>`
+            \`Authenticated! Welcome, <strong>\${email}</strong>\`
           );
           submitBtn.innerHTML = "✓ Signed In";
-          setTimeout(() => closeModal(), 2200);
+          
+          window.dispatchEvent(new CustomEvent('nexauth:success', { detail: { email } }));
+
+          setTimeout(() => {
+             if (!isInline) closeModal();
+          }, 2200);
         } else {
-          const msg = data.error || data.message || `Server responded with ${response.status}`;
+          const msg = data.error || data.message || \`Server responded with \${response.status}\`;
           if (data.stepUp) {
-            showMessage("error", `🚨 ${msg}`);
+            showMessage("error", \`🚨 \${msg}\`);
             submitBtn.innerHTML = "Account Locked";
             // Intentional: keep button disabled
           } else {
@@ -532,14 +562,19 @@
           "[NexAuth] Backend not reachable — running in demo mode.",
           networkErr
         );
-        const fakeToken = btoa(`demo:${email}:${Date.now()}`);
+        const fakeToken = btoa(\`demo:\${email}:\${Date.now()}\`);
         localStorage.setItem("nexauth_token", fakeToken);
         showMessage(
           "success",
-          `[Demo Mode] Hashed &amp; authenticated! Token stored locally.`
+          \`[Demo Mode] Hashed &amp; authenticated! Token stored locally.\`
         );
         submitBtn.innerHTML = "✓ Signed In (Demo)";
-        setTimeout(() => closeModal(), 2500);
+        
+        window.dispatchEvent(new CustomEvent('nexauth:success', { detail: { email } }));
+        
+        setTimeout(() => {
+           if (!isInline) closeModal();
+        }, 2500);
       }
     });
   }
