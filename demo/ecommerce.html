@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopEasy - Your Favorite Ecommerce Store</title>
+  <style>
+    :root {
+      --primary: #f97316;
+      --primary-hover: #ea580c;
+      --bg: #f8fafc;
+      --text: #0f172a;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+    }
+
+    /* Navbar */
+    .navbar {
+      background: var(--card-bg);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .login-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1.25rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .login-btn:hover {
+      background: var(--primary-hover);
+    }
+    
+    .user-welcome {
+      display: none;
+      font-weight: 600;
+      color: var(--text);
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 4rem 2rem;
+      text-align: center;
+      background: linear-gradient(135deg, #fffedd, #fed7aa);
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero p {
+      font-size: 1.125rem;
+      color: #475569;
+    }
+
+    /* Products Grid */
+    .container {
+      max-width: 1200px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-img {
+      height: 200px;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    .card-title {
+      font-weight: 600;
+      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-price {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .add-btn {
+      width: 100%;
+      padding: 0.5rem;
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .add-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Modal for Login */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2.5rem 2rem;
+      border-radius: 1rem;
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #64748b;
+    }
+    
+    #nexauth-container {
+      min-height: 200px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="brand">
+      🛍️ ShopEasy
+    </div>
+    <div class="nav-links">
+      <a href="#">Home</a>
+      <a href="#">Categories</a>
+      <a href="#">Deals</a>
+      
+      <button id="loginBtn" class="login-btn">Login</button>
+      <div id="userWelcome" class="user-welcome">
+        <span style="font-size: 1.25rem;">👋</span>
+        <span id="userEmailText"></span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <h1>Summer Collection is Here</h1>
+    <p>Discover the latest trends and amazing deals</p>
+  </div>
+
+  <div class="container">
+    <h2 class="section-title">Trending Now</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="card-img" style="background: #fbcfe8;">👟</div>
+        <div class="card-body">
+          <div class="card-title">Classic Sneakers</div>
+          <div class="card-price">$89.99</div>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img" style="background: #bbf7d0;">⌚</div>
+        <div class="card-body">
+          <div class="card-title">Smart Watch Pro</div>
+          <div class="card-price">$199.99</div>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img" style="background: #bfdbfe;">🎒</div>
+        <div class="card-body">
+          <div class="card-title">Urban Backpack</div>
+          <div class="card-price">$45.00</div>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-img" style="background: #fef08a;">🎧</div>
+        <div class="card-body">
+          <div class="card-title">Wireless Headphones</div>
+          <div class="card-price">$129.50</div>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeModal">&times;</button>
+      <h3 style="text-align: center; margin-bottom: 1.5rem; font-size: 1.25rem;">Sign In to ShopEasy</h3>
+      <div id="nexauth-container">
+        <!-- NexAuth Form Injection -->
+        <p style="text-align: center; color: #64748b; font-size: 0.875rem;">Loading NexAuth...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NexAuth SDK -->
+  <script 
+    src="../sdk/nexauth.js" 
+    data-key="shopEasy-key-456">
+  </script>
+
+  <script>
+    const loginBtn = document.getElementById('loginBtn');
+    const loginModal = document.getElementById('loginModal');
+    const closeModal = document.getElementById('closeModal');
+    const userWelcome = document.getElementById('userWelcome');
+    const userEmailText = document.getElementById('userEmailText');
+
+    loginBtn.addEventListener('click', () => {
+      loginModal.classList.add('active');
+    });
+
+    closeModal.addEventListener('click', () => {
+      loginModal.classList.remove('active');
+    });
+
+    loginModal.addEventListener('click', (e) => {
+      if (e.target === loginModal) {
+        loginModal.classList.remove('active');
+      }
+    });
+
+    // Mock NexAuth success event for the demo functionality
+    window.addEventListener('nexauth:success', (e) => {
+      const email = e.detail?.email || 'user@example.com';
+      loginModal.classList.remove('active');
+      loginBtn.style.display = 'none';
+      userWelcome.style.display = 'flex';
+      userEmailText.textContent = `Welcome back, ${email}!`;
+    });
+    
+    // Fallback manual trigger for demo purposes
+    document.addEventListener('keydown', (e) => {
+       if (e.ctrlKey && e.key === 'l' && loginModal.classList.contains('active')) {
+         window.dispatchEvent(new CustomEvent('nexauth:success', { detail: { email: 'demo@shopeasy.com' } }));
+       }
+    });
+  </script>
+</body>
+</html>
