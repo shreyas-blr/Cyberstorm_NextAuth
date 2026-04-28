@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "🔐 NexAuth is starting..."
+echo "💻 Backend:   http://localhost:4000"
+echo "📊 Dashboard: http://localhost:3000"
+echo "🌐 Open demo/index.html to see the demo"
+echo "✅ Everything is running!"
+
+# Using npx concurrently so it works without requiring global install
+npx concurrently -k -p "[{name}]" -n "Backend,Dashboard" -c "cyan.bold,magenta.bold" \
+  "node server/index.js" \
+  "cd dashboard && npm start"

@@ -4,6 +4,7 @@ const router = express.Router();
 const db = require("../database/db");
 const { hashPassword, comparePassword } = require("../utils/hashUtils");
 const { generateToken } = require("../utils/jwtUtils");
+const aiMonitor = require("../ai-engine/aiMonitor");
 
 // ─────────────────────────────────────────────────────────────
 // In-memory login attempt log (shared via module reference)
@@ -90,6 +91,18 @@ router.post("/login", async (req, res) => {
 
   console.log(`🔑 Login attempt: ${email} from IP ${ip}`);
 
+  // After receiving login request
+  // Before checking password
+  const aiResult = await aiMonitor.checkLogin(req, false);
+
+  if (aiResult.blocked) {
+    return res.status(403).json({
+      error: "Access blocked by AI security",
+      reason: aiResult.reason,
+      riskScore: aiResult.score
+    });
+  }
+
   // 1. Validate inputs
   if (!email || !password) {
     return res
@@ -117,6 +130,10 @@ router.post("/login", async (req, res) => {
     // Still run bcrypt to avoid timing-based enumeration
     await comparePassword(password, "$2b$10$invalidhashpaddingtowastetime000000");
     recordAttempt(false);
+    
+    // After checking password
+    await aiMonitor.checkLogin(req, false);
+    
     console.log(`❌ Login failed — user not found (${email})`);
     return res
       .status(401)
@@ -133,6 +150,10 @@ router.post("/login", async (req, res) => {
     ).run(user.id);
 
     recordAttempt(false);
+    
+    // After checking password
+    await aiMonitor.checkLogin(req, false);
+    
     console.log(`❌ Login failed — wrong password for ${email}`);
     return res
       .status(401)
@@ -146,6 +167,9 @@ router.post("/login", async (req, res) => {
 
   const token = generateToken({ id: user.id, email: user.email });
   recordAttempt(true);
+  
+  // After checking password
+  await aiMonitor.checkLogin(req, true);
 
   console.log(`✅ Login successful — token issued for ${email}`);
 
