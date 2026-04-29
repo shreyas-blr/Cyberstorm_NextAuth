@@ -1,5 +1,7 @@
 # NexAuth (Cyberstorm_NextAuth)
 
+> Build a plug-and-play, self-hosted login system that any website can integrate with one line of code, replacing Firebase/Google Auth — with an AI-powered security layer that detects anomalies, prevents brute-force attacks, and provides a real-time cybersecurity dashboard, all without sending user data to third-party servers.
+
 <img width="1146" height="606" alt="image" src="https://github.com/user-attachments/assets/d22dbb36-e29c-4aaa-98ff-71f989c704ba" />
 
 NexAuth is a plug-and-play authentication SDK with a Node/Express backend,
