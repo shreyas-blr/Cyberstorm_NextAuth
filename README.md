@@ -1,143 +1,83 @@
-# NexAuth (Cyberstorm_NextAuth)
+# NexAuth
 
-> Build a plug-and-play, self-hosted login system that any website can integrate with one line of code, replacing Firebase/Google Auth — with an AI-powered security layer that detects anomalies, prevents brute-force attacks, and provides a real-time cybersecurity dashboard, all without sending user data to third-party servers.
+> Self-hosted authentication with AI-powered security. One line of code to integrate. Zero third-party data exposure.
 
 <img width="1146" height="606" alt="image" src="https://github.com/user-attachments/assets/d22dbb36-e29c-4aaa-98ff-71f989c704ba" />
 
-NexAuth is a plug-and-play authentication SDK with a Node/Express backend,
-SQLite storage, a rules-based threat detection engine, and a React dashboard
-for live monitoring.
+**Drop-in authentication SDK** + **Express backend** + **Real-time security dashboard**. Replace Firebase/Google Auth with a self-hosted, zero-dependency solution that detects anomalies, prevents brute-force attacks, and keeps user data private.
 
-## What is in this repo
+## Key Features
 
-- SDK script that injects a login UI and hashes passwords in-browser
-- Express API for register/login/JWT verification
-- Rule-based threat detection (no external ML models)
-- React dashboard with live stats and SSE feed
-- Demo pages to validate the end-to-end flow
+- **One-line SDK integration** — inject auth UI anywhere  
+- **In-browser password hashing** — Web Crypto API, no plaintext transmission  
+- **AI threat detection** — zero external services, pure JavaScript rules  
+- **Real-time dashboard** — live login feed, risk metrics, anomaly detection  
+- **JWT-based sessions** — browser localStorage + httpOnly support  
+- **SQLite persistence** — no database setup required  
 
-## Repository layout
+## How It Works
 
-- server/ - Express API, SQLite database, AI detection modules
-- dashboard/ - React admin dashboard (Create React App)
-- sdk/ - source SDK and a local test page
-- dashboard/public/nexauth.js - SDK copy served by the dashboard dev server
-- demo/ - static demo pages that include the SDK
-- config/.env.example - environment template
-- docs/ - integration guide
+1. Website includes SDK (`<script src="...nexauth.js"></script>`)
+2. SDK hashes password in-browser (SHA-256), sends to backend  
+3. Backend bcrypt-hashes and verifies against SQLite  
+4. AI rules evaluate for threats (brute-force, anomalies, bot signals)  
+5. Success → JWT returned; dashboard streams updates via SSE  
 
-## How the system works
+## Project Structure
 
-1. A website includes the SDK from the dashboard dev server
-	(http://localhost:3000/nexauth.js) with a data-key.
-2. The SDK injects a login UI and hashes the password in the browser
-	 using the Web Crypto API (SHA-256).
-3. The SDK sends { email, hashedPassword, apiKey } to the backend.
-4. The backend bcrypt-hashes the SHA-256 hash and validates credentials
-	 against SQLite.
-5. The AI monitor evaluates the request using rules (failed attempts,
-	 user-agent signals, request frequency, anomaly signals).
-6. Each login attempt is broadcast over SSE (/stats/live), and the
-	 dashboard updates the live feed in real time.
-7. On success, the backend returns a JWT; the SDK stores it in localStorage.
+| Directory | Purpose |
+|-----------|---------|
+| `server/` | Express API, database, threat detection |
+| `dashboard/` | React admin UI (real-time stats) |
+| `sdk/` | Embedding script & test page |
+| `demo/` | Integration examples |
 
-## AI/ML dependencies (external)
+## Quick Start
 
-- No Python, scikit-learn, or external model files are required.
-- No external AI services (OpenAI, Anthropic, etc) are used.
-- The AI engine is implemented in server/AI driven detection as
-	deterministic JavaScript rules.
-- Optional external network use: Google Fonts CDN (used in SDK/demo pages).
-
-## Requirements
-
-- Node.js 20+ (better-sqlite3 ships prebuilds for Node 20+)
-- npm (bundled with Node)
-
-## Setup
-
-Windows (PowerShell):
-
-```powershell
-Set-Location "c:\Users\ASUS\Desktop\Cyberstorm_NextAuth"
-npm install --prefix server
-npm install --prefix dashboard
-if (!(Test-Path .env)) { Copy-Item config\.env.example .env }
-```
-
-macOS/Linux:
+**Requirements:** Node.js 20+, npm
 
 ```bash
-cd Cyberstorm_NextAuth
+# Install dependencies
 npm install --prefix server
 npm install --prefix dashboard
 cp config/.env.example .env
+
+# Run both backend & dashboard
+npx concurrently "node server/index.js" "npm start --prefix dashboard"
 ```
 
-## Run
+Dashboard: `http://localhost:3000`  
+Backend API: `http://localhost:4000`  
 
-Option A: two terminals
+## Try It Out
 
-```powershell
-# Terminal 1
-node server/index.js
+- **Web demo:** `demo/index.html` or `demo/ecommerce.html`  
+- **SDK test:** `sdk/test.html`  
+- **API tests:** `node server/testBackend.js`
 
-# Terminal 2
-npm start --prefix dashboard
-```
+## API Reference
 
-Option B: one command using npx concurrently
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/auth/register` | POST | Create account |
+| `/auth/login` | POST | Authenticate user |
+| `/auth/verify` | GET | Verify JWT token |
+| `/stats` | GET | Live attack summary |
+| `/stats/live` | GET | Event stream (SSE) |
 
-```powershell
-npx concurrently -k -p "[{name}]" -n "Backend,Dashboard" -c "cyan.bold,magenta.bold" "node server/index.js" "npm start --prefix dashboard"
-```
+**Body format:** `{ email, hashedPassword, apiKey }`
 
-Note: start.sh uses the same concurrently command on bash systems.
+## Configuration
 
-## Demo pages
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `PORT` | 4000 | Backend port |
+| `JWT_SECRET` | nexauth-secret | Session signing key |
 
-- Open demo/index.html or demo/ecommerce.html in your browser
-- Open sdk/test.html for a quick SDK-only flow
+## Tech Stack
 
-These pages load the SDK from http://localhost:3000/nexauth.js, so keep the
-dashboard dev server running.
-
-The SDK defaults to http://localhost:4000 as its API base. If you run
-the backend on a different host or port, update API_BASE in sdk/nexauth.js.
-
-## Environment variables
-
-- PORT (default 4000)
-- JWT_SECRET (default "nexauth-secret")
-
-The config/.env.example file includes additional placeholders for future
-configuration (for example, risk thresholds and tunnel URL), but the
-backend currently reads only PORT and JWT_SECRET.
-
-## API endpoints
-
-- POST /auth/register
-	- body: { email, password, apiKey }
-- POST /auth/login
-	- body: { email, hashedPassword, apiKey, timeToFillFormMs }
-- GET /auth/verify
-	- Authorization: Bearer <jwt>
-- GET /stats
-	- summary stats and last 20 attempts
-- GET /stats/live
-	- Server-Sent Events stream for the dashboard
-
-## Tests
-
-With the server running:
-
-```bash
-node server/testBackend.js
-```
-
-## Troubleshooting
-
-- If npm install fails on better-sqlite3, upgrade to Node 20+ and reinstall.
-- If the dashboard shows Demo Mode, the backend is not reachable on :4000.
-- If the SDK cannot reach the API, check API_BASE in sdk/nexauth.js.
-- If the SDK script 404s, ensure the dashboard is running (it serves /nexauth.js).
+- **Frontend:** React, TailwindCSS  
+- **Backend:** Node.js, Express  
+- **Database:** SQLite (zero setup)  
+- **Security:** SHA-256 (client), bcrypt + JWT (server)  
+- **Detection:** Pure JavaScript rules (no ML frameworks, no external APIs)
